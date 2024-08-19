@@ -1,0 +1,43 @@
+{
+  "name": "@okxweb3/marketplace-onchain",
+  "version": "1.0.0",
+  "description": "OKX MarketPlace onchain SDK",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
+  "devDependencies": {
+    "father": "^4.4.1",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@scure/base": "^1.1.1",
+    "@scure/btc-signer": "^1.3.2"
+  },
+  "scripts": {
+    "dev": "father dev",
+    "build": "father build"
+  },
+    "keywords": [
+    "OKX",
+    "onchain",
+    "SDK",
+    "marketplace",
+    "nft",
+    "node",
+    "typescript",
+    "javascript"
+  ],
+  "author": "OKX Developers",
+  "homepage": "https://github.com/okx/marketplace-js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/okx/marketplace-js"
+  },
+  "bugs": {
+    "url": "https://github.com/okx/marketplace-js/issues"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "license": "ISC"
+}

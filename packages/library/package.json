@@ -1,0 +1,41 @@
+{
+  "name": "@okxweb3/marketplace-library",
+  "version": "1.0.0",
+  "description": "OKX MarketPlace library SDK",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
+  "devDependencies": {
+    "father": "^4.4.1",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "axios": "^1.7.3"
+  },
+  "scripts": {
+    "dev": "father dev",
+    "build": "father build"
+  },
+  "keywords": [
+    "OKX",
+    "SDK",
+    "marketplace",
+    "nft",
+    "node",
+    "typescript",
+    "javascript"
+  ],
+  "author": "OKX Developers",
+  "homepage": "https://github.com/okx/marketplace-js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/okx/marketplace-js"
+  },
+  "bugs": {
+    "url": "https://github.com/okx/marketplace-js/issues"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "license": "ISC"
+}
