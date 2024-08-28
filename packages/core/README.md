@@ -73,4 +73,24 @@ demo.use(async (ctx, next) => {
 await demo.buy({ psbt: 'psbt' });
 ```
 
+### Pubsub
+
+The PubSub system is a simple yet effective implementation of the Publish-Subscribe pattern designed in TypeScript. It allows different parts of an application to communicate with each other by subscribing to and publishing events.
+
+```js
+import { PubSub } from '@okxweb3/marketplace-core'
+
+const pubSub = new PubSub();
+
+const onMessage = (data) => {
+  console.log(`Received message: ${data.text}`);
+};
+
+pubSub.subscribe('message', onMessage);
+
+pubSub.publish('message', { text: 'Hello, World!' }); // Received message: Hello, World!
+
+pubSub.unsubscribe('message', onMessage);
+```
+
 
