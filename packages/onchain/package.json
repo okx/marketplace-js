@@ -15,7 +15,9 @@
   },
   "scripts": {
     "dev": "father dev",
-    "build": "father build"
+    "build": "father build",
+    "publish": "father build && npm publish",
+    "publish:beta": "father build && npm publish --tag beta"
   },
     "keywords": [
     "OKX",

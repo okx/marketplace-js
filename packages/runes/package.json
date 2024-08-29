@@ -12,7 +12,9 @@
   "scripts": {
     "dev": "father dev",
     "build": "father build",
-    "test": "jest"
+    "test": "jest",
+    "publish": "father build && npm publish",
+    "publish:beta": "father build && npm publish --tag beta"
   },
   "keywords": [
     "OKX",
