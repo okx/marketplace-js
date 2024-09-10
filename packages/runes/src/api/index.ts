@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 import { Service } from '@okxweb3/marketplace-library'
 import URL, { OPEN_API_BASE_URL } from './url'
-import { ADDRESS_TYPE, UTXO_SPEND_STATUS, ORDERS_SORT_RULES } from '../constants'
+import { ADDRESS_TYPE, UTXO_SPEND_STATUS, ORDERS_SORT_RULES, RUNES_LISTING_STATUS } from '../constants'
 import { getPublicKeyAndAddress, signMessage } from '../actions'
 import { orderInfoOption } from '../actions/buyPsbt'
 
@@ -18,6 +18,37 @@ interface apiOptions {
 
 interface getSellersPsbtOptions {
     orderInfos: orderInfoOption[];
+}
+
+interface IPrice {
+  currency: string;
+  currencyUrl: string;
+  price: string;
+  satPrice: string;
+  usdPrice: string;
+}
+
+interface IRunesAssets {
+  amount: string;
+  assetId: string;
+  chain: number;
+  inscriptionNum: string;
+  listTime: number;
+  name: string;
+  orderId: number;
+  ownerAddress: string;
+  status: RUNES_LISTING_STATUS;
+  symbol: string;
+  ticker: string;
+  tickerIcon: string;
+  tickerId: string;
+  tickerType: number;
+  totalPrice: IPrice,
+  txHash: string;
+  unitPrice: IPrice,
+  utxoTxHash: string;
+  utxoValue: string;
+  utxoVout: number;
 }
 
 export class OkxRunesAPI {
@@ -150,7 +181,7 @@ export class OkxRunesAPI {
   }
 
   // get marketplace runes assets
-  public async getOwnedAsserts (params: { runesId: string, cursor?: string, limit?: string }): Promise<{ items: {runesId: number, name: string, amount: number}[]}> {
+  public async getOwnedAssets (params: { runesId: string, cursor?: string, limit?: string }): Promise<{ cursor: string, items: IRunesAssets[]}> {
     const { address } = await getPublicKeyAndAddress({
       privateKey: this.privateKey,
       addressType: this.addressType
@@ -159,8 +190,8 @@ export class OkxRunesAPI {
       ...params,
       walletAddresses: address
     }
-    const requestHeader = this.getRequestApiHeader(URL.GET_OWNED_ASSERTS, 'GET', requestParams)
-    const data = await this.apiClient.get(URL.GET_OWNED_ASSERTS, requestParams, requestHeader) as { items: {runesId: number, name: string, amount: number}[]}
+    const requestHeader = this.getRequestApiHeader(URL.GET_OWNED_ASSETS, 'GET', requestParams)
+    const data = await this.apiClient.get(URL.GET_OWNED_ASSETS, requestParams, requestHeader) as { cursor: string, items: IRunesAssets[]}
     return data
   }
 

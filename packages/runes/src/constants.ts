@@ -27,3 +27,10 @@ export enum SIGN_ALGORITHM {
     ECDSA = 1,
     BIP332 = 2,
 }
+
+// runes listing status
+export enum RUNES_LISTING_STATUS {
+    UNLISTED = 0,
+    LISTED = 1,
+    PENDING = 2
+}

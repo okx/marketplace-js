@@ -7,7 +7,7 @@ export default {
   ORDERS_PSBT: '/api/v5/mktplace/nft/runes/bulk-psbt',
   ORDERS_BUY: '/api/v5/mktplace/nft/runes/bulk-purchase',
   UTXOS: '/api/v5/waas/wallet/utxo/utxos',
-  GET_OWNED_ASSERTS: '/api/v5/mktplace/nft/runes/get-owned-asserts',
+  GET_OWNED_ASSETS: '/api/v5/mktplace/nft/runes/get-owned-asserts',
   CANCEL_TEXT: '/api/v5/mktplace/nft/runes/bulk-cancel-text',
   CANCEL_SUBMIT: '/api/v5/mktplace/nft/runes/bulk-cancel-submit'
 }
