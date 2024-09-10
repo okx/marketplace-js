@@ -33,17 +33,20 @@ export class OkxRunesSDK extends Middleware<BaseContext> {
   private privateKey: string = ''
 
   // address type
-  public addressType: ADDRESS_TYPE = ADDRESS_TYPE.SEGWIT_TAPROOT
+  public addressType: ADDRESS_TYPE
 
   public api: OkxRunesAPI
 
   constructor (options: sdkOptions) {
     super()
     this.privateKey = options.privateKey
-    this.addressType = options.addressType
+    this.addressType = options.addressType || ADDRESS_TYPE.SEGWIT_TAPROOT
     this.getPublicKeyAndAddressByPrivateKey()
     // openApi
-    this.api = new OkxRunesAPI(options)
+    this.api = new OkxRunesAPI({
+      ...options,
+      addressType: this.addressType
+    })
 
     this.use(loggerMiddleware)
   }
@@ -131,8 +134,8 @@ export class OkxRunesSDK extends Middleware<BaseContext> {
     }
 
     // get signMessage text
-    const { text } = await this.api.getCancelSellText({
-      orderIds: orderIds.join()
+    const { id, text } = await this.api.getCancelSellText({
+      orderIds: orderIds.join(',')
     })
 
     // sign message
@@ -144,7 +147,7 @@ export class OkxRunesSDK extends Middleware<BaseContext> {
 
     // cancel runes orders
     await this.api.cancelSellSubmit({
-      id: orderIds.join(),
+      id,
       signature,
       signAlgorithm: SIGN_ALGORITHM.ECDSA
     })

@@ -165,7 +165,7 @@ export class OkxRunesAPI {
   }
 
   // get marketplace runes cancel sell signMessage text
-  public async getCancelSellText (params: { orderIds: string }): Promise<{ text: string }> {
+  public async getCancelSellText (params: { orderIds: string }): Promise<{ id: string, text: string }> {
     const { address, publicKey } = await getPublicKeyAndAddress({
       privateKey: this.privateKey,
       addressType: this.addressType
@@ -176,7 +176,7 @@ export class OkxRunesAPI {
       walletAddress: address
     }
     const requestHeader = this.getRequestApiHeader(URL.CANCEL_TEXT, 'GET', requestParams)
-    const data = await this.apiClient.get(URL.CANCEL_TEXT, requestParams, requestHeader) as { text: string }
+    const data = await this.apiClient.get(URL.CANCEL_TEXT, requestParams, requestHeader) as { id: string, text: string }
     return data
   }
 
