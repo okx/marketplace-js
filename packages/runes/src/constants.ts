@@ -21,3 +21,9 @@ export enum ORDERS_SORT_RULES {
     LISTED_TIME_ASC = 'listedTimeAsc',
     LISTED_TIME_DESC = 'listedTimeDesc',
 }
+
+// cancel sell sign algorithm
+export enum SIGN_ALGORITHM {
+    ECDSA = 1,
+    BIP332 = 2,
+}

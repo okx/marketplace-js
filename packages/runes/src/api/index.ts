@@ -109,7 +109,7 @@ export class OkxRunesAPI {
   }
 
   // get utxos
-  private async getUtxos (spendStatus:UTXO_SPEND_STATUS): Promise<Record<string, unknown>> {
+  public async getUtxos (spendStatus:UTXO_SPEND_STATUS): Promise<Record<string, unknown>> {
     // get publickey and address by private key
     const { address } = await getPublicKeyAndAddress({
       privateKey: this.privateKey,
@@ -146,6 +146,44 @@ export class OkxRunesAPI {
   public async getOrders (params: { runesId: string, cursor?: string, limit?: string, sortBy?: ORDERS_SORT_RULES }): Promise<{ cursor: string, items: {orderId:number}[]}> {
     const requestHeader = this.getRequestApiHeader(URL.RUNES_ORDERS, 'GET', params)
     const data = await this.apiClient.get(URL.RUNES_ORDERS, params, requestHeader) as { cursor: string, items: {orderId:number}[]}
+    return data
+  }
+
+  // get marketplace runes assets
+  public async getOwnedAsserts (params: { runesId: string, cursor?: string, limit?: string }): Promise<{ items: {runesId: number, name: string, amount: number}[]}> {
+    const { address } = await getPublicKeyAndAddress({
+      privateKey: this.privateKey,
+      addressType: this.addressType
+    })
+    const requestParams = {
+      ...params,
+      walletAddresses: address
+    }
+    const requestHeader = this.getRequestApiHeader(URL.GET_OWNED_ASSERTS, 'GET', requestParams)
+    const data = await this.apiClient.get(URL.GET_OWNED_ASSERTS, requestParams, requestHeader) as { items: {runesId: number, name: string, amount: number}[]}
+    return data
+  }
+
+  // get marketplace runes cancel sell signMessage text
+  public async getCancelSellText (params: { orderIds: string }): Promise<{ text: string }> {
+    const { address, publicKey } = await getPublicKeyAndAddress({
+      privateKey: this.privateKey,
+      addressType: this.addressType
+    })
+    const requestParams = {
+      ...params,
+      walletPubkey: publicKey,
+      walletAddress: address
+    }
+    const requestHeader = this.getRequestApiHeader(URL.CANCEL_TEXT, 'GET', requestParams)
+    const data = await this.apiClient.get(URL.CANCEL_TEXT, requestParams, requestHeader) as { text: string }
+    return data
+  }
+
+  // get marketplace runes cancel sell signMessage text
+  public async cancelSellSubmit (params: { id: string, signature: string, signAlgorithm: number }): Promise<{}> {
+    const requestHeader = this.getRequestApiHeader(URL.CANCEL_SUBMIT, 'POST', params)
+    const data = await this.apiClient.post(URL.CANCEL_SUBMIT, params, requestHeader) as {}
     return data
   }
 }

@@ -2,9 +2,9 @@ import { UtxoData, BtcAddressSig } from '@okxweb3/marketplace-onchain'
 import { mixinMiddleware, Middleware } from '@okxweb3/marketplace-core'
 import { BaseContext } from './types/middleware'
 import { loggerMiddleware } from './middleware/logger'
-import { getBuyerPsbt, getPublicKeyAndAddress, orderInfoOption } from './actions'
+import { getBuyerPsbt, getPublicKeyAndAddress, orderInfoOption, signMessage } from './actions'
 import { OkxRunesAPI } from './api'
-import { ADDRESS_TYPE, UTXO_SPEND_STATUS, ORDERS_SORT_RULES } from './constants'
+import { ADDRESS_TYPE, UTXO_SPEND_STATUS, ORDERS_SORT_RULES, SIGN_ALGORITHM } from './constants'
 
 interface sdkOptions {
   privateKey: string,
@@ -109,6 +109,47 @@ export class OkxRunesSDK extends Middleware<BaseContext> {
     const { txHash } = await this.api.sendTransations({ buyerPSBT: psbt, fromAddress: address, orderIds })
 
     return { txHash, networkFee }
+  }
+
+  /**
+   * cancel runes orders
+   * @param orderIds
+   * @returns {Promise<boolean>} result
+   */
+  @mixinMiddleware
+  async cancelSell ({
+    orderIds
+  }: {
+    orderIds: number[];
+    }): Promise<boolean> {
+    if (!orderIds || orderIds.length <= 0) {
+      throw new Error('orderId required')
+    }
+
+    if (orderIds.length > 20) {
+      throw new Error('Maximum batch cancel 20 orders')
+    }
+
+    // get signMessage text
+    const { text } = await this.api.getCancelSellText({
+      orderIds: orderIds.join()
+    })
+
+    // sign message
+    const signature = await signMessage({
+      privateKey: this.privateKey,
+      message: text,
+      address: this.ctx.address
+    })
+
+    // cancel runes orders
+    await this.api.cancelSellSubmit({
+      id: orderIds.join(),
+      signature,
+      signAlgorithm: SIGN_ALGORITHM.ECDSA
+    })
+
+    return true
   }
 }
 export { ADDRESS_TYPE, UTXO_SPEND_STATUS, ORDERS_SORT_RULES }
