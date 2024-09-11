@@ -49,3 +49,12 @@ const sendPsbtTransation = async () => {
     return txHash
 }
 sendPsbtTransation()
+
+// get runes assets
+const getOwnedAsserts = async () => {
+    const data = await sdk.api.getOwnedAssets({
+        runesId: '840000:3'
+    });
+    return data
+}
+getOwnedAsserts();
