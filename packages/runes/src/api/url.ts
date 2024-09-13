@@ -6,5 +6,7 @@ export default {
   RUNES_ORDERS: '/api/v5/mktplace/nft/runes/get-runes-order-list',
   ORDERS_PSBT: '/api/v5/mktplace/nft/runes/bulk-psbt',
   ORDERS_BUY: '/api/v5/mktplace/nft/runes/bulk-purchase',
-  UTXOS: '/api/v5/waas/wallet/utxo/utxos'
+  UTXOS: '/api/v5/waas/wallet/utxo/utxos',
+  TRADE_HISTORY: '/api/v5/mktplace/nft/runes/trade-history'
+
 }

@@ -59,8 +59,62 @@ export class OkxRunesSDK extends Middleware<BaseContext> {
     return { address, publicKey }
   }
 
+  // buy runes
   @mixinMiddleware
   async buy ({
+    orderIds,
+    paymentUtxos,
+    networkFeeRate
+  }: {
+    orderIds: number[];
+    paymentUtxos: UtxoData[];
+    networkFeeRate: number;
+    }): Promise<{ txHash: string, networkFee: number }> {
+    if (!orderIds || orderIds.length <= 0) {
+      throw new Error('orderId required')
+    }
+
+    if (!networkFeeRate) {
+      throw new Error('networkFeeRate required')
+    }
+
+    // get publickey and address by private key
+    const { address, publicKey } = await this.getPublicKeyAndAddressByPrivateKey()
+
+    if (address.startsWith(BtcAddressSig.LEGACY)) {
+      throw new Error('legacy address is not supported, please switch to another address')
+    }
+
+    const orders = await this.api.getSellersPsbt(orderIds) || []
+    const orderInfos = orders.orderInfos.map(({ psbt, makerFee, makerFeeAddress, takerFee, takerFeeAddress }:orderInfoOption) => {
+      return {
+        psbt,
+        makerFee,
+        makerFeeAddress,
+        takerFee,
+        takerFeeAddress
+      }
+    })
+
+    // get psbt
+    const { psbt, networkFee } = await getBuyerPsbt({
+      walletAddress: address,
+      orderInfos,
+      publicKey,
+      paymentUtxos,
+      networkFeeRate,
+      privateKey: this.privateKey
+    })
+
+    // send transation
+    const { txHash } = await this.api.sendTransations({ buyerPSBT: psbt, fromAddress: address, orderIds })
+
+    return { txHash, networkFee }
+  }
+
+  // sell runes
+  @mixinMiddleware
+  async sell ({
     orderIds,
     paymentUtxos,
     networkFeeRate

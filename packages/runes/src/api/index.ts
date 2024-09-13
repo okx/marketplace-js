@@ -148,4 +148,11 @@ export class OkxRunesAPI {
     const data = await this.apiClient.get(URL.RUNES_ORDERS, params, requestHeader) as { cursor: string, items: {orderId:number}[]}
     return data
   }
+
+  // get transaction history
+  public async getTransactionHistory (params: { runesIds?: string, cursor?: string, limit?: string }): Promise<{ cursor: string, items: {orderId:number}[]}> {
+    const requestHeader = this.getRequestApiHeader(URL.TRADE_HISTORY, 'GET', params)
+    const data = await this.apiClient.get(URL.TRADE_HISTORY, params, requestHeader) as { cursor: string, items: { orderId: number }[] }
+    return data
+  }
 }
