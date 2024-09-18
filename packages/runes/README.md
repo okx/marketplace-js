@@ -69,9 +69,26 @@ await buyRunes();
 
 | Field Name     | Type   | Required | Description                                                                                                                                                                                                                                                                           |
 | -------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| orderIds       | Array  | Yes      | Unique identifiers for the Runes tokens                                                                                                                                                                                                                                               |
+| orderIds       | Array  | Yes      | Runes order id list                                                                                                                                                                                                        |
 | paymentUtxos   | Array  | Yes      | UTXOs used to assemble the purchase transaction. Ensure they contain no other assets and that the total amount covers the order and network fees.<br />You can get your address utxo from[ here](https://docs.unisat.io/dev/unisat-developer-center/general/addresses/get-btc-utxo) |
 | networkFeeRate | Number | Yes      | The desired network fee rate.                                                                                                                                                                                                                                                         |
+
+### Cancel Runes Orders
+
+The SDK supports automatic assembly of off-shelf transactions, allowing multiple orders to be canceled at the same time. Here's how you can use it:
+
+```javascript
+await sdk.cancelSell({
+  orderIds: [orderId1, orderId2],  // OKX Runes order IDs, you can get orderId by sdk.api.getOrders()
+});
+```
+
+**Parameter Details:**
+
+
+| Field Name     | Type   | Required | Description                                                                                                                                                                                                                                                                           |
+| -------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| orderIds       | Array  | Yes      | Runes order id list                                                   |
 
 ### API
 
@@ -196,6 +213,73 @@ await requestApi();
 | fromAddress | String | Yes      | Buyer's payment address                                                                                     |
 | orderIds    | Array  | Yes      | IDs of the orders to purchase                                                                               |
 | buyerPSBT   | String | Yes      | Signed buyer PSBT, must be in base64 format, and assembled according to the specified transaction structure |
+
+#### getOwnedAsserts
+
+Get the runes assets from the OKX marketplace using this API.
+The detailed response interface can be found in [Runes API](https://www.okx.com/zh-hans/web3/build/docs/waas/marketplace-runes-asset).
+Here's demo:
+
+```javascript
+const requestApi = async () => {
+  const data = await sdk.api.getOwnedAsserts({
+    runesId: '840000:3',  // Desired Runes ID
+  });
+
+  // data structure demo
+
+  // {
+  //   "cursor": "1",
+  //   "items": [
+  //     {
+  //       "amount": "500000",
+  //       "assetId": "28912795273673038",
+  //       "chain": 0,
+  //       "confirmations": null,
+  //       "inscriptionNum": "",
+  //       "listTime": 1714399069,
+  //       "name": "DOG•GO•TO•THE•MOON",
+  //       "orderId": 201296,
+  //       "ownerAddress": "bc1p3fj806enwnmz04444mpm42ykgdcta9p5mvzx46hp8wmg2knpwxpq0k46x9",
+  //       "status": 1,
+  //       "symbol": "🐕",
+  //       "ticker": "DOG•GO•TO•THE•MOON",
+  //       "tickerIcon": "https://static.coinall.ltd/cdn/web3/currency/token/1714125941761.png/type=png_350_0",
+  //       "tickerId": "840000:3",
+  //       "tickerType": 4,
+  //       "totalPrice": {
+  //       "currency": "BTC",
+  //       "currencyUrl": "https://static.coinall.ltd/cdn/nft/4834651a-7c4e-4249-91c1-cf680af39dc0.png",
+  //       "price": "0.031895",
+  //       "satPrice": "3189500",
+  //       "usdPrice": "1979.7003235"
+  //     },
+  //       "txHash": "",
+  //       "unavailable": null,
+  //       "unitPrice": {
+  //       "currency": "BTC",
+  //       "currencyUrl": "https://static.coinall.ltd/cdn/nft/4834651a-7c4e-4249-91c1-cf680af39dc0.png",
+  //       "price": "0.00000006379",
+  //       "satPrice": "6.379",
+  //       "usdPrice": "0.003959400647"
+  //     },
+  //       "utxoTxHash": "ce302f5c946ff3ef502eade58405d64b545d59de9fcd731314b88ddadf709ca6",
+  //       "utxoValue": "546",
+  //       "utxoVout": 2
+  //     }
+  //   ]
+  // }
+
+}
+await requestApi();
+```
+
+**Parameter Details:**
+
+
+| Field Name | Type   | Required | Description                                                                                                                                                                                                                                                 |
+| ---------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| runesId    | String | Yes      | Unique identifier for the Runes token                                                                                                                                                                                                                       |
 
 ### Middleware
 

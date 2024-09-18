@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 import { Service } from '@okxweb3/marketplace-library'
 import URL, { OPEN_API_BASE_URL } from './url'
-import { ADDRESS_TYPE, UTXO_SPEND_STATUS, ORDERS_SORT_RULES } from '../constants'
+import { ADDRESS_TYPE, UTXO_SPEND_STATUS, ORDERS_SORT_RULES, RUNES_LISTING_STATUS } from '../constants'
 import { getPublicKeyAndAddress, signMessage } from '../actions'
 import { orderInfoOption } from '../actions/buyPsbt'
 
@@ -18,6 +18,37 @@ interface apiOptions {
 
 interface getSellersPsbtOptions {
     orderInfos: orderInfoOption[];
+}
+
+interface IPrice {
+  currency: string;
+  currencyUrl: string;
+  price: string;
+  satPrice: string;
+  usdPrice: string;
+}
+
+interface IRunesAssets {
+  amount: string;
+  assetId: string;
+  chain: number;
+  inscriptionNum: string;
+  listTime: number;
+  name: string;
+  orderId: number;
+  ownerAddress: string;
+  status: RUNES_LISTING_STATUS;
+  symbol: string;
+  ticker: string;
+  tickerIcon: string;
+  tickerId: string;
+  tickerType: number;
+  totalPrice: IPrice,
+  txHash: string;
+  unitPrice: IPrice,
+  utxoTxHash: string;
+  utxoValue: string;
+  utxoVout: number;
 }
 
 export class OkxRunesAPI {
@@ -150,9 +181,65 @@ export class OkxRunesAPI {
   }
 
   // get transaction history
-  public async getTransactionHistory (params: { runesIds?: string, cursor?: string, limit?: string }): Promise<{ cursor: string, items: {orderId:number}[]}> {
+  public async getTransactionHistory (params: { runesIds?: string, cursor?: string, limit?: string }): Promise<{ cursor: string, items: { orderId: number }[] }> {
     const requestHeader = this.getRequestApiHeader(URL.TRADE_HISTORY, 'GET', params)
     const data = await this.apiClient.get(URL.TRADE_HISTORY, params, requestHeader) as { cursor: string, items: { orderId: number }[] }
+    return data
+  }
+
+  // get marketplace runes assets
+  public async getOwnedAssets (params: { runesId: string, cursor?: string, limit?: string }): Promise<{ cursor: string, items: IRunesAssets[]}> {
+    const { address } = await getPublicKeyAndAddress({
+      privateKey: this.privateKey,
+      addressType: this.addressType
+    })
+    const requestParams = {
+      ...params,
+      walletAddresses: address
+    }
+    const requestHeader = this.getRequestApiHeader(URL.GET_OWNED_ASSETS, 'GET', requestParams)
+    const data = await this.apiClient.get(URL.GET_OWNED_ASSETS, requestParams, requestHeader) as { cursor: string, items: IRunesAssets[]}
+    return data
+  }
+
+  // get marketplace runes cancel sell signMessage text
+  public async getCancelSellText (params: { orderIds: string }): Promise<{ id: string, text: string }> {
+    const { address, publicKey } = await getPublicKeyAndAddress({
+      privateKey: this.privateKey,
+      addressType: this.addressType
+    })
+    const requestParams = {
+      ...params,
+      walletPubkey: publicKey,
+      walletAddress: address
+    }
+    const requestHeader = this.getRequestApiHeader(URL.CANCEL_TEXT, 'GET', requestParams)
+    const data = await this.apiClient.get(URL.CANCEL_TEXT, requestParams, requestHeader) as { id: string, text: string }
+    return data
+  }
+
+  // get marketplace runes cancel sell signMessage text
+  public async cancelSellSubmit (params: { id: string, signature: string, signAlgorithm: number }): Promise<{}> {
+    const requestHeader = this.getRequestApiHeader(URL.CANCEL_SUBMIT, 'POST', params)
+    const data = await this.apiClient.post(URL.CANCEL_SUBMIT, params, requestHeader) as {}
+    return data
+  }
+
+  // sell runes
+  public async sellRunes (options: {
+    runesId: string;
+    walletAddress: string;
+    items: {
+      utxo: string;
+      unitPrice: number,
+      totalPrice: number,
+      psbt: string;
+      makerFee?: number
+    }[];
+  }): Promise< { txHash: string; }> {
+    console.log(11111, options)
+    const requestHeader = this.getRequestApiHeader(URL.SELL_RUNES, 'POST', options)
+    const data = await this.apiClient.post(URL.SELL_RUNES, options, requestHeader) as { txHash: string; }
     return data
   }
 }
