@@ -4,7 +4,7 @@ import { BaseContext } from './types/middleware'
 import { loggerMiddleware } from './middleware/logger'
 import { getBuyerPsbt, getSellerPsbt, getPublicKeyAndAddress, orderInfoOption, signMessage, btcToSats, satsToBtc } from './actions'
 import { OkxRunesAPI } from './api'
-import { ADDRESS_TYPE, UTXO_SPEND_STATUS, ORDERS_SORT_RULES, SIGN_ALGORITHM } from './constants'
+import { ADDRESS_TYPE, UTXO_SPEND_STATUS, ORDERS_SORT_RULES, SIGN_ALGORITHM, RUNES_LISTING_STATUS } from './constants'
 interface sdkOptions {
   privateKey: string,
   apikey: string,
@@ -237,6 +237,6 @@ export class OkxRunesSDK extends Middleware<BaseContext> {
     return true
   }
 }
-export { ADDRESS_TYPE, UTXO_SPEND_STATUS, ORDERS_SORT_RULES }
+export { ADDRESS_TYPE, UTXO_SPEND_STATUS, ORDERS_SORT_RULES, RUNES_LISTING_STATUS }
 
 export * from './types/context'
