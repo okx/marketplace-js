@@ -1,6 +1,6 @@
 {
   "name": "@okxweb3/marketplace-core",
-  "version": "1.1.0-beta",
+  "version": "1.1.0",
   "description": "OKX MarketPlace Core SDK",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
