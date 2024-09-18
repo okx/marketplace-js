@@ -236,10 +236,9 @@ export class OkxRunesAPI {
       psbt: string;
       makerFee?: number
     }[];
-  }): Promise< { txHash: string; }> {
-    console.log(11111, options)
+  }): Promise< { orderId: string; }> {
     const requestHeader = this.getRequestApiHeader(URL.SELL_RUNES, 'POST', options)
-    const data = await this.apiClient.post(URL.SELL_RUNES, options, requestHeader) as { txHash: string; }
+    const data = await this.apiClient.post(URL.SELL_RUNES, options, requestHeader) as { orderId: string; }
     return data
   }
 }
