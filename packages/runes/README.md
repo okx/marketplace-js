@@ -67,11 +67,76 @@ await buyRunes();
 **Parameter Details:**
 
 
-| Field Name     | Type   | Required | Description                                                                                                                                                                                                                                                                           |
-| -------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| orderIds       | Array  | Yes      | Unique identifiers for the Runes tokens                                                                                                                                                                                                                                               |
+| Field Name     | Type   | Required | Description                                                                                                                                                                                                                                                                         |
+| -------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| orderIds       | Array  | Yes      | Runes order id list                                                                                                                                                                                                                                                                 |
 | paymentUtxos   | Array  | Yes      | UTXOs used to assemble the purchase transaction. Ensure they contain no other assets and that the total amount covers the order and network fees.<br />You can get your address utxo from[ here](https://docs.unisat.io/dev/unisat-developer-center/general/addresses/get-btc-utxo) |
-| networkFeeRate | Number | Yes      | The desired network fee rate.                                                                                                                                                                                                                                                         |
+| networkFeeRate | Number | Yes      | The desired network fee rate.                                                                                                                                                                                                                                                       |
+
+#### sell runes
+
+Sell runes assets to the OKX marketplace.
+The detailed response interface can be found in [Runes API](https://www.okx.com/zh-hans/web3/build/docs/waas/marketplace-runes-asset).
+Here's demo:
+
+```javascript
+const requestApi = async () => {
+  const { result } = await sdk.sell({
+    assets: [{
+        utxoTxHash: 'ce302f5c946ff3ef502eade58405d64b545d59de9fcd731314b88ddadf709ca6',
+        utxoValue: 546,
+        utxoVout: 0, 
+        unitPrice: 1000000,
+        amount: 100
+    }],
+    runesId: '840000:3'
+  })
+
+// data structure demo
+
+// {
+//    "result": [
+//       {
+//          "utxo": "txHash:vout", 
+//           "orderId": 123,    // orderid
+//           "errMsg": "xxxxx"   // if errMsg，sell fail
+//        }
+//     ]
+// }
+
+}
+await requestApi();
+```
+
+**Parameter Details:**
+
+
+| Field Name | Type   | Required | Description                                                                                                         |
+| ---------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------- |
+| runesId    | String | Yes      | Unique identifier for the Runes token                                                                               |
+| utxoVout   | number | Yes      | runes assets utxo location vout                                                                                     |
+| utxoTxHash | String | Yes      | runes assets utxo location                                                                                          |
+| utxoValue  | number | Yes      | runes assets utxo value, unit: sats                                                                                 |
+| unitPrice  | number | Yes      | runes assets unit price, unit: sats                                                                                 |
+| amount     | String | Yes      | runes assets amount                                                                                                 |
+| makerFee   | number | No       | MakerFee charged by a pending source If a makerFee is charged, the totalPrice shall include the makerFee, unit: BTC |
+
+### Cancel Runes Orders
+
+The SDK supports automatic assembly of off-shelf transactions, allowing multiple orders to be canceled at the same time. Here's how you can use it:
+
+```javascript
+await sdk.cancelSell({
+  orderIds: [orderId1, orderId2],  // OKX Runes order IDs, you can get orderId by sdk.api.getOrders()
+});
+```
+
+**Parameter Details:**
+
+
+| Field Name | Type  | Required | Description         |
+| ---------- | ----- | -------- | ------------------- |
+| orderIds   | Array | Yes      | Runes order id list |
 
 ### API
 
@@ -166,7 +231,7 @@ await requestApi();
 | ---------- | ----- | -------- | ----------- |
 | orderIds   | Array | Yes      | Order IDs   |
 
-#### sendTransactions
+#### sendTransations
 
 Broadcast Runes purchase transactions with this API to obtain the transaction hash (`txHash`).
 The detailed response interface can be found in [Runes API](https://docs.google.com/document/d/1-1PDayNKPMRO58weA6cEIYO59FxP6gzAVWlXIXSKQLM/edit#heading=h.veb5bcvk3m6o).
@@ -196,6 +261,121 @@ await requestApi();
 | fromAddress | String | Yes      | Buyer's payment address                                                                                     |
 | orderIds    | Array  | Yes      | IDs of the orders to purchase                                                                               |
 | buyerPSBT   | String | Yes      | Signed buyer PSBT, must be in base64 format, and assembled according to the specified transaction structure |
+
+#### getOwnedAsserts
+
+Get the runes assets from the OKX marketplace using this API.
+The detailed response interface can be found in [Runes API](https://www.okx.com/zh-hans/web3/build/docs/waas/marketplace-runes-asset).
+Here's demo:
+
+```javascript
+const requestApi = async () => {
+  const data = await sdk.api.getOwnedAsserts({
+    runesId: '840000:3',  // Desired Runes ID
+  });
+
+  // data structure demo
+
+  // {
+  //   "cursor": "1",
+  //   "items": [
+  //     {
+  //       "amount": "500000",
+  //       "assetId": "28912795273673038",
+  //       "chain": 0,
+  //       "confirmations": null,
+  //       "inscriptionNum": "",
+  //       "listTime": 1714399069,
+  //       "name": "DOG•GO•TO•THE•MOON",
+  //       "orderId": 201296,
+  //       "ownerAddress": "bc1p3fj806enwnmz04444mpm42ykgdcta9p5mvzx46hp8wmg2knpwxpq0k46x9",
+  //       "status": 1,
+  //       "symbol": "🐕",
+  //       "ticker": "DOG•GO•TO•THE•MOON",
+  //       "tickerIcon": "https://static.coinall.ltd/cdn/web3/currency/token/1714125941761.png/type=png_350_0",
+  //       "tickerId": "840000:3",
+  //       "tickerType": 4,
+  //       "totalPrice": {
+  //       "currency": "BTC",
+  //       "currencyUrl": "https://static.coinall.ltd/cdn/nft/4834651a-7c4e-4249-91c1-cf680af39dc0.png",
+  //       "price": "0.031895",
+  //       "satPrice": "3189500",
+  //       "usdPrice": "1979.7003235"
+  //     },
+  //       "txHash": "",
+  //       "unavailable": null,
+  //       "unitPrice": {
+  //       "currency": "BTC",
+  //       "currencyUrl": "https://static.coinall.ltd/cdn/nft/4834651a-7c4e-4249-91c1-cf680af39dc0.png",
+  //       "price": "0.00000006379",
+  //       "satPrice": "6.379",
+  //       "usdPrice": "0.003959400647"
+  //     },
+  //       "utxoTxHash": "ce302f5c946ff3ef502eade58405d64b545d59de9fcd731314b88ddadf709ca6",
+  //       "utxoValue": "546",
+  //       "utxoVout": 2
+  //     }
+  //   ]
+  // }
+
+}
+await requestApi();
+```
+
+**Parameter Details:**
+
+
+| Field Name | Type   | Required | Description                           |
+| ---------- | ------ | -------- | ------------------------------------- |
+| runesId    | String | Yes      | Unique identifier for the Runes token |
+
+#### sellRunes
+
+Sell runes assets to the OKX marketplace using this API.
+The detailed response interface can be found in [Runes API](https://www.okx.com/zh-hans/web3/build/docs/waas/marketplace-runes-asset).
+Here's demo:
+
+```javascript
+const requestApi = async () => {
+  const { result } = await sdk.api.sellRunes({
+    items: [{
+        utxo: 'ce302f5c946ff3ef502eade58405d64b545d59de9fcd731314b88ddadf709ca6:0',
+        totalPrice: 0.1,
+        psbt: 'cHNidP8BALICAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/////uiAcc6RHA+aers8xRS3pcg6QslcZrjUYkUDOf0F0aJAAAAAAAP////8CAAAAAAAAAAAiUSDBJU2tQKrqEh5T4M7AmYY2L2zUIieW0ZSMlHkbNSgctbi5ZQAAAAAAIlEgOalwW0bhaMYRYpVC76AtqEx3l3po000r2GHSSfEYIhIAAAAAAAEBKwAAAAAAAAAAIlEgwSVNrUCq6hIeU+DOwJmGNi9s1CInltGUjJR5GzUoHLUBAwQBAAAAARcgYW4nMjhA7gwq5DTZmCZ/gRcJiLqUd/eNzQD8JHon20AAAQErSgEAAAAAAAAiUSA5qXBbRuFoxhFilULvoC2oTHeXemjTTSvYYdJJ8RgiEgEDBIMAAAABE0Hc/KUEmP4rXEeBdm7pJk2MtthYBFWG5TuVYI0Vcg85JshzH5hTxhJCsJBYI12FgMSDw7MSzBxIaZ4IEPI8qCj+gwEXIOHNunNxyMsNjrfkS7IpiwDSn9zL1jV8kgNEu4MLntyoAAABBSDhzbpzccjLDY635EuyKYsA0p/cy9Y1fJIDRLuDC57cqAA=';
+        unitPrice: 1000000
+    }],
+    runesId: '840000:3',
+    walletAddress: 'bc1p3fj806enwnmz04444mpm42ykgdcta9p5mvzx46hp8wmg2knpwxpq0k46x9'
+  })
+
+  // data structure demo
+
+// {
+//    "result": [
+//       {
+//          "utxo": "txHash:vout", 
+//           "orderId": 123,    // orderid
+//           "errMsg": "xxxxx"   // if errMsg，sell fail
+//        }
+//     ]
+// }
+
+}
+await requestApi();
+```
+
+**Parameter Details:**
+
+
+| Field Name    | Type   | Required | Description                                                                                                         |
+| ------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------- |
+| runesId       | String | Yes      | Unique identifier for the Runes token                                                                               |
+| walletAddress | String | Yes      | wallet address                                                                                                      |
+| utxo          | String | Yes      | runes assets utxo location                                                                                          |
+| totalPrice    | number | Yes      | runes assets total price, unit: BTC                                                                                 |
+| unitPrice     | number | Yes      | runes assets unit price, unit: sats                                                                                 |
+| psbt          | String | Yes      | runes assets sell psbt                                                                                              |
+| makerFee      | number | No       | MakerFee charged by a pending source If a makerFee is charged, the totalPrice shall include the makerFee, unit: BTC |
 
 ### Middleware
 
