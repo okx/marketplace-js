@@ -1,3 +1,5 @@
+import { deepClone } from '../../utils'
+
 export function mixinMiddleware (
   target: any,
   propertyKey: string,
@@ -9,7 +11,7 @@ export function mixinMiddleware (
     descriptor.value = async function (...args: any[]) {
       const _this: any = this
       // create current transaction context
-      const ctx = JSON.parse(JSON.stringify(_this.ctx))
+      const ctx = deepClone(_this.ctx)
       ctx.type = propertyKey
       if (!ctx.request) {
         ctx.request = {}
