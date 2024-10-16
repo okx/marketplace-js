@@ -1,14 +1,14 @@
-import crypto from 'crypto';
-import { Service } from '@okxweb3/marketplace-library';
-import URL, { OPEN_API_BASE_URL } from './url';
+import crypto from 'crypto'
+import { Service } from '@okxweb3/marketplace-library'
+import URL, { OPEN_API_BASE_URL } from './url'
 import {
   ADDRESS_TYPE,
   UTXO_SPEND_STATUS,
   ORDERS_SORT_RULES,
-  RUNES_LISTING_STATUS,
-} from '../constants';
-import { getPublicKeyAndAddress, signMessage } from '../actions';
-import { orderInfoOption } from '../actions/buyPsbt';
+  RUNES_LISTING_STATUS
+} from '../constants'
+import { getPublicKeyAndAddress, signMessage } from '../actions'
+import { orderInfoOption } from '../actions/buyPsbt'
 
 interface apiOptions {
   privateKey: string;
@@ -57,64 +57,64 @@ interface IRunesAssets {
 
 export class OkxRunesAPI {
   // The api Key obtained from the previous application
-  private apikey: string = '';
+  private apikey: string = ''
   // The key obtained from the previous application
-  private secretKey: string = '';
+  private secretKey: string = ''
   // The password created when applying for the key
-  private passphrase: string = '';
+  private passphrase: string = ''
   // wallet private key
-  private privateKey: string = '';
+  private privateKey: string = ''
   // The projectId created when applying project
 
-  private projectId: string = '';
+  private projectId: string = ''
   // address type
-  public addressType: ADDRESS_TYPE = ADDRESS_TYPE.SEGWIT_TAPROOT;
+  public addressType: ADDRESS_TYPE = ADDRESS_TYPE.SEGWIT_TAPROOT
 
-  public apiClient: Service;
+  public apiClient: Service
 
-  constructor({
+  constructor ({
     apikey,
     secretKey,
     passphrase,
     addressType,
     privateKey,
     projectId,
-    requestBaseUrl,
+    requestBaseUrl
   }: apiOptions) {
-    this.apikey = apikey;
-    this.secretKey = secretKey;
-    this.passphrase = passphrase;
-    this.addressType = addressType;
-    this.privateKey = privateKey;
-    this.projectId = projectId;
+    this.apikey = apikey
+    this.secretKey = secretKey
+    this.passphrase = passphrase
+    this.addressType = addressType
+    this.privateKey = privateKey
+    this.projectId = projectId
 
-    this.apiClient = new Service(requestBaseUrl || OPEN_API_BASE_URL);
+    this.apiClient = new Service(requestBaseUrl || OPEN_API_BASE_URL)
   }
 
   // params to string
-  private getRequestParamsStr(method: string, params: Record<string, unknown>) {
-    if (!params) return '';
+  private getRequestParamsStr (method: string, params: Record<string, unknown>) {
+    if (!params) return ''
     if (method === 'GET') {
       const str = Object.keys(params)
         .map((key) => `${key}=${params[key]}`)
-        .join('&');
-      return '?' + str;
+        .join('&')
+      return '?' + str
     }
-    return JSON.stringify(params);
+    return JSON.stringify(params)
   }
 
-  private getRequestApiHeader(
+  private getRequestApiHeader (
     url: string,
     method: string,
-    params: Record<string, unknown>,
+    params: Record<string, unknown>
   ) {
     // Get the current time
-    const date = new Date();
-    const timestamp = date.toISOString();
-    const originalMessage = this.getRequestParamsStr(method, params);
-    const hmac = crypto.createHmac('sha256', this.secretKey);
-    hmac.update(timestamp + method + url + originalMessage);
-    const accessSign = hmac.digest('base64');
+    const date = new Date()
+    const timestamp = date.toISOString()
+    const originalMessage = this.getRequestParamsStr(method, params)
+    const hmac = crypto.createHmac('sha256', this.secretKey)
+    hmac.update(timestamp + method + url + originalMessage)
+    const accessSign = hmac.digest('base64')
 
     return {
       headers: {
@@ -123,24 +123,24 @@ export class OkxRunesAPI {
         'OK-ACCESS-TIMESTAMP': timestamp,
         'OK-ACCESS-PASSPHRASE': this.passphrase,
         'OK-ACCESS-PROJECT': this.projectId,
-        'Ok-Sdk-Source': 'marketplace-runes-sdk',
-      },
-    };
+        'Ok-Sdk-Source': 'marketplace-runes-sdk'
+      }
+    }
   }
 
   // subscribe okx wallet
-  private async subscribeWallet(): Promise<Record<string, unknown>> {
+  private async subscribeWallet (): Promise<Record<string, unknown>> {
     // get publickey and address by private key
     const { address, publicKey } = await getPublicKeyAndAddress({
       privateKey: this.privateKey,
-      addressType: this.addressType,
-    });
+      addressType: this.addressType
+    })
 
     const signature = await signMessage({
       privateKey: this.privateKey,
       message: new Date().getTime().toString(),
-      address,
-    });
+      address
+    })
 
     const params = {
       signMessage: Date.now(),
@@ -149,48 +149,48 @@ export class OkxRunesAPI {
           chainIndex: 0,
           address,
           publicKey,
-          signature,
-        },
-      ],
-    };
+          signature
+        }
+      ]
+    }
     const requestHeader = this.getRequestApiHeader(
       URL.CREATE_ACCOUNT,
       'POST',
-      params,
-    );
+      params
+    )
     const data = (await this.apiClient.post(
       URL.CREATE_ACCOUNT,
       params,
-      requestHeader,
-    )) as Record<string, unknown>;
-    return data;
+      requestHeader
+    )) as Record<string, unknown>
+    return data
   }
 
   // get utxos
-  private async getUtxos(
-    spendStatus: UTXO_SPEND_STATUS,
+  private async getUtxos (
+    spendStatus: UTXO_SPEND_STATUS
   ): Promise<Record<string, unknown>> {
     // get publickey and address by private key
     const { address } = await getPublicKeyAndAddress({
       privateKey: this.privateKey,
-      addressType: this.addressType,
-    });
+      addressType: this.addressType
+    })
     const params = {
       chainIndex: 0,
       address,
-      spendStatus: spendStatus || UTXO_SPEND_STATUS.UNSPEND,
-    };
-    const requestHeader = this.getRequestApiHeader(URL.UTXOS, 'GET', params);
+      spendStatus: spendStatus || UTXO_SPEND_STATUS.UNSPEND
+    }
+    const requestHeader = this.getRequestApiHeader(URL.UTXOS, 'GET', params)
     const data = (await this.apiClient.get(
       URL.UTXOS,
       params,
-      requestHeader,
-    )) as Record<string, unknown>;
-    return data;
+      requestHeader
+    )) as Record<string, unknown>
+    return data
   }
 
   // send transations
-  public async sendTransations(options: {
+  public async sendTransations (options: {
     fromAddress: string;
     orderIds: number[];
     buyerPSBT: string;
@@ -198,38 +198,38 @@ export class OkxRunesAPI {
     const requestHeader = this.getRequestApiHeader(
       URL.ORDERS_BUY,
       'POST',
-      options,
-    );
+      options
+    )
     const data = (await this.apiClient.post(
       URL.ORDERS_BUY,
       options,
-      requestHeader,
-    )) as { txHash: string };
-    return data;
+      requestHeader
+    )) as { txHash: string }
+    return data
   }
 
   // get sellers psbt
-  public async getSellersPsbt(
-    options: number[],
+  public async getSellersPsbt (
+    options: number[]
   ): Promise<getSellersPsbtOptions> {
     const params = {
-      orderIds: options.join(),
-    };
+      orderIds: options.join()
+    }
     const requestHeader = this.getRequestApiHeader(
       URL.ORDERS_PSBT,
       'GET',
-      params,
-    );
+      params
+    )
     const data = (await this.apiClient.get(
       URL.ORDERS_PSBT,
       params,
-      requestHeader,
-    )) as getSellersPsbtOptions;
-    return data;
+      requestHeader
+    )) as getSellersPsbtOptions
+    return data
   }
 
   // get marketplace runes order
-  public async getOrders(params: {
+  public async getOrders (params: {
     runesId: string;
     cursor?: string;
     limit?: string;
@@ -238,18 +238,18 @@ export class OkxRunesAPI {
     const requestHeader = this.getRequestApiHeader(
       URL.RUNES_ORDERS,
       'GET',
-      params,
-    );
+      params
+    )
     const data = (await this.apiClient.get(
       URL.RUNES_ORDERS,
       params,
-      requestHeader,
-    )) as { cursor: string; items: { orderId: number }[] };
-    return data;
+      requestHeader
+    )) as { cursor: string; items: { orderId: number }[] }
+    return data
   }
 
   // get transaction history
-  public async getTransactionHistory(params: {
+  public async getTransactionHistory (params: {
     runesIds?: string;
     cursor?: string;
     limit?: string;
@@ -257,71 +257,71 @@ export class OkxRunesAPI {
     const requestHeader = this.getRequestApiHeader(
       URL.TRADE_HISTORY,
       'GET',
-      params,
-    );
+      params
+    )
     const data = (await this.apiClient.get(
       URL.TRADE_HISTORY,
       params,
-      requestHeader,
-    )) as { cursor: string; items: { orderId: number }[] };
-    return data;
+      requestHeader
+    )) as { cursor: string; items: { orderId: number }[] }
+    return data
   }
 
   // get marketplace runes assets
-  public async getOwnedAssets(params: {
+  public async getOwnedAssets (params: {
     runesId: string;
     cursor?: string;
     limit?: string;
   }): Promise<{ cursor: string; items: IRunesAssets[] }> {
     const { address } = await getPublicKeyAndAddress({
       privateKey: this.privateKey,
-      addressType: this.addressType,
-    });
+      addressType: this.addressType
+    })
     const requestParams = {
       ...params,
-      walletAddresses: address,
-    };
+      walletAddresses: address
+    }
     const requestHeader = this.getRequestApiHeader(
       URL.GET_OWNED_ASSETS,
       'GET',
-      requestParams,
-    );
+      requestParams
+    )
     const data = (await this.apiClient.get(
       URL.GET_OWNED_ASSETS,
       requestParams,
-      requestHeader,
-    )) as { cursor: string; items: IRunesAssets[] };
-    return data;
+      requestHeader
+    )) as { cursor: string; items: IRunesAssets[] }
+    return data
   }
 
   // get marketplace runes cancel sell signMessage text
-  public async getCancelSellText(params: {
+  public async getCancelSellText (params: {
     orderIds: string;
   }): Promise<{ id: string; text: string }> {
     const { address, publicKey } = await getPublicKeyAndAddress({
       privateKey: this.privateKey,
-      addressType: this.addressType,
-    });
+      addressType: this.addressType
+    })
     const requestParams = {
       ...params,
       walletPubkey: publicKey,
-      walletAddress: address,
-    };
+      walletAddress: address
+    }
     const requestHeader = this.getRequestApiHeader(
       URL.CANCEL_TEXT,
       'GET',
-      requestParams,
-    );
+      requestParams
+    )
     const data = (await this.apiClient.get(
       URL.CANCEL_TEXT,
       requestParams,
-      requestHeader,
-    )) as { id: string; text: string };
-    return data;
+      requestHeader
+    )) as { id: string; text: string }
+    return data
   }
 
   // get marketplace runes cancel sell signMessage text
-  public async cancelSellSubmit(params: {
+  public async cancelSellSubmit (params: {
     id: string;
     signature: string;
     signAlgorithm: number;
@@ -329,18 +329,18 @@ export class OkxRunesAPI {
     const requestHeader = this.getRequestApiHeader(
       URL.CANCEL_SUBMIT,
       'POST',
-      params,
-    );
+      params
+    )
     const data = (await this.apiClient.post(
       URL.CANCEL_SUBMIT,
       params,
-      requestHeader,
-    )) as {};
-    return data;
+      requestHeader
+    )) as {}
+    return data
   }
 
   // sell runes
-  public async sellRunes(options: {
+  public async sellRunes (options: {
     runesId: string;
     walletAddress: string;
     items: {
@@ -354,13 +354,13 @@ export class OkxRunesAPI {
     const requestHeader = this.getRequestApiHeader(
       URL.SELL_RUNES,
       'POST',
-      options,
-    );
+      options
+    )
     const data = (await this.apiClient.post(
       URL.SELL_RUNES,
       options,
-      requestHeader,
-    )) as { orderId: string };
-    return data;
+      requestHeader
+    )) as { orderId: string }
+    return data
   }
 }
