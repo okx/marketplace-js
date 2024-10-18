@@ -56,5 +56,14 @@ export const btcToSats = (value: number | string) => {
   return Number(value) * satsPerBtc
 }
 
+// sats change to btc
+export const satsToBtc = (value: number | string) => {
+  if (!value) {
+    return 0
+  }
+  const satsPerBtc = 100000000 // 1 BTC = 100,000,000 sats
+  return Number(value) / satsPerBtc
+}
+
 // min utxo output value
 export const MIN_UTXO_VALUE = 546

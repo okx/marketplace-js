@@ -157,7 +157,6 @@ describe('OkxRunesAPI', () => {
       });
       (api.apiClient.get as jest.Mock).mockResolvedValue({ utxos: [] })
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
       const data = await api.getUtxos(UTXO_SPEND_STATUS.UNSPEND)
 
       expect(data).toEqual({ utxos: [] })
@@ -223,6 +222,67 @@ describe('OkxRunesAPI', () => {
 
       expect(result).toEqual({ cursor: 'nextCursor', items: [{ orderId: 1 }] })
       expect(api.apiClient.get).toHaveBeenCalledWith(URL.RUNES_ORDERS, params, expect.any(Object))
+    })
+  })
+
+  describe('getOwnedAssets', () => {
+    it('should get runes owned assets and return data', async () => {
+      const params = { runesId: 'mockRunesId', cursor: 'mockCursor', limit: '10' };
+      (api.apiClient.get as jest.Mock).mockResolvedValue({
+        cursor: 'nextCursor',
+        items: [
+          {
+            amount: '500000',
+            name: 'DOG•GO•TO•THE•MOON',
+            orderId: 201296,
+            status: 1,
+            ticker: 'DOG•GO•TO•THE•MOON'
+          }
+        ]
+      })
+
+      const result = await api.getOwnedAssets(params)
+
+      expect(result).toEqual({
+        cursor: 'nextCursor',
+        items: [{
+          amount: '500000',
+          name: 'DOG•GO•TO•THE•MOON',
+          orderId: 201296,
+          status: 1,
+          ticker: 'DOG•GO•TO•THE•MOON'
+        }]
+      })
+    })
+  })
+
+  describe('getCancelSellText', () => {
+    it('should get cancel sell text and return data', async () => {
+      const params = { orderIds: 'mockOrderIds' };
+      (api.apiClient.get as jest.Mock).mockResolvedValue({
+        id: '0e581de5f0764529a0e5cd0e69e3f762',
+        text: 'Confirm to cancel the following 1 order(s)',
+        walletAddress: 'walletAddress'
+      })
+
+      const result = await api.getCancelSellText(params)
+
+      expect(result).toEqual({
+        id: '0e581de5f0764529a0e5cd0e69e3f762',
+        text: 'Confirm to cancel the following 1 order(s)',
+        walletAddress: 'walletAddress'
+      })
+    })
+  })
+
+  describe('cancelSellSubmit', () => {
+    it('should cancel sell submit and return data', async () => {
+      const params = { id: 'mockId', signature: 'mockSignature', signAlgorithm: 1 };
+      (api.apiClient.post as jest.Mock).mockResolvedValue({})
+
+      const result = await api.cancelSellSubmit(params)
+
+      expect(result).toEqual({})
     })
   })
 })

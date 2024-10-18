@@ -1,6 +1,6 @@
 {
   "name": "@okxweb3/marketplace-core",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "OKX MarketPlace Core SDK",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -32,7 +32,9 @@
   },
   "scripts": {
     "dev": "father dev",
-    "build": "father build"
+    "build": "father build",
+    "publish": "father build && npm publish",
+    "publish:beta": "father build && npm publish --tag beta"
   },
   "license": "ISC"
 }
